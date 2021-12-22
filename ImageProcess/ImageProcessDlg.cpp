@@ -349,7 +349,6 @@ void CImageProcessDlg::OnBnClickedButtonsaveimage()
 	//file.Close();
 }
 
-
 //灰度化
 void CImageProcessDlg::OnBnClickedButtonimagegray()
 {
