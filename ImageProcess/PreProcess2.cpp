@@ -40,10 +40,7 @@ END_MESSAGE_MAP()
 
 
 // PreProcess2 消息处理程序
-
-
-
-
+//透视变换
 void PreProcess2::OnBnClickedButtongeotransform2()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -73,41 +70,36 @@ void PreProcess2::OnBnClickedButtongeotransform2()
 	dstPoints[3] = Point2f(0, srcImage.rows);
 
 	Mat Perspective = getPerspectiveTransform(srcPointsP, dstPoints);//由四个点对计算透视变换矩阵  
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
-
 		warpPerspective(srcImage, middleImage1, Perspective, srcImage.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//透视变换\n";
 		fout << "warpPerspective(srcImage, middleImage1, " << Perspective << ", " << "srcImage.size());\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		warpPerspective(srcImage, middleImage1, Perspective, middleImage2.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "//透视变换\n";
 		fout << "warpPerspective(middleImage2, middleImage1, " << Perspective << ", " << "middleImage2.size());\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		warpPerspective(srcImage, middleImage2, Perspective, middleImage1.size());
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//透视变换\n";
 		fout << "warpPerspective(middleImage1, middleImage2, " << Perspective << ", " << "middleImage1.size());\n";
 	}
 }
 
-
+//图像增强  直方图均衡化
 void PreProcess2::OnBnClickedButtonimageenhance2()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -116,7 +108,6 @@ void PreProcess2::OnBnClickedButtonimageenhance2()
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
@@ -127,11 +118,11 @@ void PreProcess2::OnBnClickedButtonimageenhance2()
 		cvtColor(srcImage, middleImage1, CV_BGR2GRAY);
 		equalizeHist(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "//直方图均衡化\n";						//注释
+		fout << "//直方图均衡化\n";						
 		fout << "equalizeHist(srcImage, middleImage1);\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		if (middleImage2.channels() != 3)
@@ -142,12 +133,11 @@ void PreProcess2::OnBnClickedButtonimageenhance2()
 		cvtColor(middleImage2, middleImage2, CV_BGR2GRAY);
 		equalizeHist(middleImage2, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
 		fout << "//直方图均衡化\n";
 		fout << "equalizeHist(middleImage2, middleImage1);\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		if (middleImage1.channels() != 3)
@@ -158,16 +148,15 @@ void PreProcess2::OnBnClickedButtonimageenhance2()
 		cvtColor(middleImage1, middleImage1, CV_BGR2GRAY);
 		equalizeHist(middleImage1, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
 		fout << "//直方图均衡化\n";
 		fout << "equalizeHist(middleImage1, middleImage2);\n";
 	}
 	flagEnhance = 1;       //图像增强处理标志位  默认图像增强方式处理完后，如果效果不好，需要修改增强方式，则对原图进行图像增强处理
-
 }
 
-
+//调整几何变换界面
 void PreProcess2::OnBnClickedButtonadjustgeotransform()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -175,7 +164,7 @@ void PreProcess2::OnBnClickedButtonadjustgeotransform()
 	ImageGeoTransformDlg.DoModal();
 }
 
-
+//调整图像增强界面
 void PreProcess2::OnBnClickedButtonadjustimageenhance()
 {
 	// TODO: 在此添加控件通知处理程序代码

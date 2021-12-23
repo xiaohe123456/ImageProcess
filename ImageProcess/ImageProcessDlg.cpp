@@ -3,11 +3,11 @@
 //
 
 #include "pch.h"
-#include "CommonData.h"
 #include "framework.h"
 #include "ImageProcess.h"
 #include "ImageProcessDlg.h"
 #include "afxdialogex.h"
+#include "CommonData.h"
 #include "yaml-cpp/yaml.h"
 #include "ImageFilter.h"
 #include "ImageEnhance.h"
@@ -20,7 +20,6 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
 
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -123,7 +122,6 @@ BOOL CImageProcessDlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
 	}
-
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
@@ -159,7 +157,6 @@ BOOL CImageProcessDlg::OnInitDialog()
 	::SetParent(hWnd1, GetDlgItem(IDC_ShowMidImage1)->m_hWnd);
 	::ShowWindow(hParent1, SW_HIDE);
 
-
 	//嵌套OpenCV窗口显示图像  中间结果2
 	CRect rect2;
 	GetDlgItem(IDC_ShowMidImage2)->GetWindowRect(rect2);
@@ -170,7 +167,6 @@ BOOL CImageProcessDlg::OnInitDialog()
 	HWND hParent2 = ::GetParent(hWnd2);
 	::SetParent(hWnd2, GetDlgItem(IDC_ShowMidImage2)->m_hWnd);
 	::ShowWindow(hParent2, SW_HIDE);
-
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -222,7 +218,6 @@ HCURSOR CImageProcessDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
 //读取图像
 void CImageProcessDlg::OnBnClickedButtonopenimage()
 {
@@ -238,11 +233,9 @@ void CImageProcessDlg::OnBnClickedButtonopenimage()
 	mPath2 = dlg.GetFolderPath();		//获取文件夹路径
 	int iEndPos = 0;
 	iEndPos = mPath.ReverseFind('\\');	//找到CString对象中与要求的字符匹配的最后一个字符的索引
-	mPath1 = mPath.Left(iEndPos);	//返回由最左边的'iEndPos'字符组成的子字符串
-
-	HANDLE file;				//文件句柄
-	WIN32_FIND_DATA fileData;	//文件查找结构体
-	
+	mPath1 = mPath.Left(iEndPos);		//返回由最左边的'iEndPos'字符组成的子字符串
+	HANDLE file;						//文件句柄
+	WIN32_FIND_DATA fileData;			//文件查找结构体
 	mFileList.clear();			
 	mPath1 += "\\*.jpg";
 	file = FindFirstFile(mPath1.GetBuffer(), &fileData);	//查找mPath1路径下的第一个文件
@@ -258,23 +251,22 @@ void CImageProcessDlg::OnBnClickedButtonopenimage()
 	numImageMax = mFileList.size();					//当前路径下文件数目
 	int length = mFileList.at(0).GetLength();		//文件名长度
 	CString imageName = mPath.Right(length);		//获取文件名
-
 	for (int i = 0; i < numImageMax; i++)
 	{
 		if (imageName.Compare(mFileList.at(i)) == 0)	//在文件名列表中找到与当前文件名相同的序号
 			numImageNow = i;
 	}
-
 	//读取Mat类型的图像
 	pathName = CW2A(mPath.GetString());
 	srcImage = imread(pathName);
 	dstImage = srcImage;
+	resultMidWindow1.push_back(srcImage);			//将原图保存到结果图像向量的起始位置
+	resultMidWindow2.push_back(srcImage);
 	//为了保证图像与picture控件大小相适应
 	CRect rect;
 	GetDlgItem(IDC_ShowOriImg)->GetClientRect(&rect);
 	resize(srcImage, srcImage, Size(rect.Width(), rect.Height()));
 	imshow(OriginalWindowName, srcImage);
-	
 }
 
 //通过按钮获取上一张图像
@@ -293,6 +285,9 @@ void CImageProcessDlg::OnBnClickedButtonpreimage()
 		pathName = CW2A(mPath2.GetString());
 		pathName = pathName + "\\" + CW2A(mFileList.at(numImageNow).GetString());
 		srcImage = imread(pathName);
+		dstImage = srcImage;
+		resultMidWindow1.push_back(srcImage);			//将原图保存到结果图像向量的起始位置
+		resultMidWindow2.push_back(srcImage);
 		//为了保证图像与picture控件大小相适应
 		CRect rect;
 		GetDlgItem(IDC_ShowOriImg)->GetClientRect(&rect);
@@ -317,12 +312,14 @@ void CImageProcessDlg::OnBnClickedButtonnextimage()
 		pathName = CW2A(mPath2.GetString());
 		pathName = pathName + "\\" + CW2A(mFileList.at(numImageNow).GetString());
 		srcImage = imread(pathName);
+		dstImage = srcImage;
+		resultMidWindow1.push_back(srcImage);			//将原图保存到结果图像向量的起始位置
+		resultMidWindow2.push_back(srcImage);
 		//为了保证图像与picture控件大小相适应
 		CRect rect;
 		GetDlgItem(IDC_ShowOriImg)->GetClientRect(&rect);
 		resize(srcImage, srcImage, Size(rect.Width(), rect.Height()));
 		imshow(OriginalWindowName, srcImage);
-
 	}
 }
 
@@ -346,8 +343,9 @@ void CImageProcessDlg::OnBnClickedButtonsaveimage()
 		imwrite(mPath, middleImage2);
 	else
 		MessageBox(_T("error"));
-	//file.Close();
+	fout.close();
 }
+
 
 //灰度化
 void CImageProcessDlg::OnBnClickedButtonimagegray()
@@ -358,10 +356,6 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-	//file.Open(str, CFile::modeCreate|CFile::modeWrite); //创建新文件或以只写方式打开文件
-	//ofstream fout("yamlTest.yaml");             //方式2：创建yaml文件
-	//YAML::Node config = YAML::LoadFile(str);    //加载yaml文件
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 ==0)
 	{
 		if (srcImage.channels() != 3)
@@ -371,16 +365,10 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		}
 		cvtColor(srcImage, middleImage1, CV_BGR2GRAY);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//CString op("cvtColor(srcImage, middleImage1, CV_BGR2GRAY);");  //定义图像处理操作为CString类型，写到yaml文件中
-		//op.Append(CString("\r\n"));         //添加换行
-		//file.Write(op, op.GetLength() * 2);   //写到文件中
-
-		//config["op"] = "cvtColor(srcImage, middleImage1, CV_BGR2GRAY);";     //定义图像处理操作
-		fout << "cvtColor(srcImage, middleImage1, CV_BGR2GRAY);\n";           //方式2写yaml文件
-		//fout.close();
+		fout << "cvtColor(srcImage, middleImage1, CV_BGR2GRAY);\n"; 
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if ((middleWindow1 == middleWindow2) || (middleWindow2 > middleWindow1))
 	{
 		if (middleImage2.channels() != 3)
@@ -390,12 +378,10 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		}
 		cvtColor(middleImage2, middleImage1, CV_BGR2GRAY);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "cvtColor(middleImage2, middleImage1, CV_BGR2GRAY);\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		if (middleImage1.channels() != 3)
@@ -405,9 +391,8 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		}
 		cvtColor(middleImage1, middleImage2, CV_BGR2GRAY);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "cvtColor(middleImage1, middleImage2, CV_BGR2GRAY);\n";
 	}
 }
@@ -423,29 +408,27 @@ void CImageProcessDlg::OnBnClickedButtonbinary()
 	}
 	int thresholdMin = MinThreshold.GetPos();
 	int thresholdMax = MaxThreshold.GetPos();
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		threshold(srcImage, middleImage1, thresholdMin, thresholdMax, THRESH_BINARY);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "threshold(srcImage, middleImage1, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if ((middleWindow1 == middleWindow2) || (middleWindow2 > middleWindow1))
 	{
 		threshold(middleImage2, middleImage1, thresholdMin, thresholdMax, THRESH_BINARY);
 		imshow(MiddleWindowName1, middleImage1);
-		//middleImage2.rows = 0;
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "threshold(middleImage2, middleImage1, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		threshold(middleImage1, middleImage2, thresholdMin, thresholdMax, THRESH_BINARY);
 		imshow(MiddleWindowName2, middleImage2);
-		//middleImage1.rows = 0;
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		fout << "threshold(middleImage1, middleImage2, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
 	}
@@ -561,15 +544,15 @@ void on_mouse(int event, int x, int y, int flags, void* ustc)
 	{
 		srcPoints[countL] = Point(x, y);
 		sprintf_s(locate, "(%d,%d)", x, y);  //将数据格式化输出到字符串
-		config["Points"][countL] = locate;
-		if (countL == 0)
-		{
-			config["Points"]["0"] = locate;
-		}
-		if (countL == 1)
-		{
-			config["Points"]["1"] = locate;
-		}
+
+		if (countL == 0)						//在yaml文件中设置Node结点,表示选中源点的坐标
+		{				
+			config["Points"]["0"] = locate;		//在yaml文件中以如下格式显示
+		}										//Points:									
+		if (countL == 1)						//	0: (138, 119)
+		{										//	1 : (420, 172)
+			config["Points"]["1"] = locate;		//	2 : (421, 311)
+		}										//	3 : (186, 314)
 		if (countL == 2)
 		{
 			config["Points"]["2"] = locate;
@@ -590,16 +573,14 @@ void on_mouse(int event, int x, int y, int flags, void* ustc)
 		img1 = srcImage.clone();
 		sprintf_s(locate, "(%d,%d)", x, y);
 		putText(img1, locate, Point(x, y), FONT_HERSHEY_PLAIN, 3.0, CV_RGB(0, 0, 255));
-		if (flagMouse == 1)
+		if (flagMouse == 1)			//表示执行过鼠标缩放事件  显示缩放后的结果
 		{
 			imshow(OriginalWindowName, dstImage);
-			//flagMouse = 0;
 		}
 		else
 		{
-		imshow(OriginalWindowName, img1);
-		}
-			
+			imshow(OriginalWindowName, img1);
+		}	
 	}
 	//鼠标右键事件  仿射变换
 	if (event == CV_EVENT_RBUTTONDOWN)
@@ -639,8 +620,8 @@ void on_mouse(int event, int x, int y, int flags, void* ustc)
 		pWnd->GetClientRect(&rect);
 		resize(srcImage, srcImage, Size(rect.Width(), rect.Height()));
 		imshow(OriginalWindowName, srcImage);
-		fout.close();
-		fout.open(str);
+		fout.close();				//关闭后再打开是为了清空前一次透视变换得到的矩阵，保证在yaml文件
+		fout.open(str);				//中只保存最新选中的透视变换中的源点
 	}
 }
 
@@ -771,29 +752,41 @@ void onMouse(int event, int x, int y, int flags, void* ustc)
 /*
 撤销操作：
 1.定义变量middleWindow1和middleWindow2两个变量，分别表示中间窗口1和2显示结果的次数
-当middleWindow1 > middleWindow2且middleWindow2不为0时，表示在最后一次操作中，窗口2是原图，窗口1是
-结果图，撤销操作就是将窗口1恢复为窗口2中的图像，并将middleImage1改为middleImage2
-2.当middleWindow1 < middleWindow2或middleWindow1 = middleWindow2时，表示在最后一次操作中，窗口1是
-原图，窗口2是结果图，撤销操作则为将窗口2恢复为窗口1中的图像，并将middleImage2改为middleImage1
+resultMidWindow1和resultMidWindow2表示窗口结果1和2保存的结果图像，加载图像时将原图分别放到
+resultMidWindow1和resultMidWindow2中，保证middleWindow1和结果向量resultMidWindow1中的结果序号对应
+2.当middleWindow1 > middleWindow2且middleWindow2不为0时，表示在最后一次操作中，窗口2是上一次结果图，
+窗口1是当前结果图，撤销操作就是将窗口1恢复为窗口2中的图像，并将middleWindow1减1且窗口2结果向量
+移除最后一个元素（如果再点撤销的话，窗口2将显示再前一步的结果，需将前一次结果移除）
+3.当middleWindow1 > middleWindow2且middleWindow2为0时，表示只对图像做了一步处理操作，撤销处理则只是
+将窗口1显示为原图即可，即显示resultMidWindow2的元素（此时resultMidWindow2只有一个原图），并将
+middleWindow1减1
+4.当middleWindow1 < middleWindow2或middleWindow1 = middleWindow2时，表示在最后一次操作中，窗口1是
+上一次结果图，窗口2是当前结果图，撤销操作则将窗口2恢复为窗口1中的图像，并将middleWindow2减1且
+窗口1结果向量移除最后一个元素
 */
 void CImageProcessDlg::OnBnClickedButtonrevoke()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	if (((middleWindow1 == middleWindow2) || (middleWindow1 < middleWindow2)) && (middleWindow1 > 0 && middleWindow2 > 0))
 	{
-		imshow(MiddleWindowName2, middleImage1);
-		//middleImage2 = middleImage1;
+		imshow(MiddleWindowName2, resultMidWindow1[middleWindow1]);
+		resultMidWindow1.pop_back();
 		middleWindow2--;
 	}
 	else if ((middleWindow1 > middleWindow2) && (middleWindow2 != 0) && (middleWindow1 >= 0 && middleWindow2 >= 0))
 	{
-		imshow(MiddleWindowName1, middleImage2);
-		//middleImage1 = middleImage2;
+		imshow(MiddleWindowName1, resultMidWindow2[middleWindow2]);
+		resultMidWindow2.pop_back();
 		middleWindow1--;
 	}
 	else if ((middleWindow1 > middleWindow2) && (middleWindow2 == 0) && (middleWindow1 >= 0 && middleWindow2 >= 0))  //只做了一步操作
 	{
-		imshow(MiddleWindowName1, srcImage);
+		//为了保证图像与picture控件大小相适应
+		CRect rect;
+		GetDlgItem(IDC_ShowMidImage1)->GetClientRect(&rect);
+		resize(resultMidWindow2[middleWindow2], resultMidWindow2[middleWindow2], Size(rect.Width(), rect.Height()));
+		imshow(MiddleWindowName1, resultMidWindow2[middleWindow2]);
+		resultMidWindow1.pop_back();
 		middleWindow1--;
 	}
 	else if (middleWindow1 == 0 && middleWindow2 == 0)

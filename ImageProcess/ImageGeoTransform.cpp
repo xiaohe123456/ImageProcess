@@ -70,16 +70,15 @@ BOOL ImageGeoTransform::OnInitDialog()
 		str.Format(_T("%d"), flip);
 		FlipCode.AddString(str);
 	}
-	MoveX.SetCurSel(255);
+	MoveX.SetCurSel(255);				//设置初值
 	MoveY.SetCurSel(255);
 	RotateAngle.SetCurSel(255);
 	ImageScale.SetCurSel(10);
 	SimilarityAngle.SetCurSel(255);
-	SimilarityScale.SetCurSel(255);//设置初值
+	SimilarityScale.SetCurSel(255);
 	FlipCode.SetCurSel(1);
 	return 0;
 }
-
 
 // ImageGeoTransform 消息处理程序
 //平移
@@ -114,34 +113,30 @@ void ImageGeoTransform::OnBnClickedButtonimagemove()
 	Move.at<float>(1, 1) = 1;
 	Move.at<float>(1, 2) = dMoveY;   //垂直平移量  平移参数应由外部传入
 
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		warpAffine(srcImage, middleImage1, Move, srcImage.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//平移\n";
 		fout << "warpAffine(srcImage, middleImage1, " << Move << "," << "srcImage.size());\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		warpAffine(middleImage2, middleImage1, Move, middleImage2.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "//平移\n";
 		fout << "warpAffine(middleImage2, middleImage1, " << Move << ", " << "middleImage2.size());\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		warpAffine(middleImage1, middleImage2, Move, middleImage1.size());
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//平移\n";
 		fout << "warpAffine(middleImage1, middleImage2, " << Move << ", " << "middleImage1.size());\n";
 	}
@@ -169,7 +164,6 @@ void ImageGeoTransform::OnBnClickedButtonimagerotate()
 	RotateAngle.GetLBText(index, angle);
 	double dAngle = _ttof(angle);
 
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		Point2f center(srcImage.cols / 2.0, srcImage.rows / 2.0);
@@ -178,46 +172,38 @@ void ImageGeoTransform::OnBnClickedButtonimagerotate()
 		Rect2f bbox = RotatedRect(Point2f(), srcImage.size(), dAngle).boundingRect2f();
 		Rotate.at<double>(0, 2) += bbox.width / 2.0 - srcImage.cols / 2.0;
 		Rotate.at<double>(1, 2) += bbox.height / 2.0 - srcImage.rows / 2.0;
-
 		warpAffine(srcImage, middleImage1, Rotate, bbox.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//旋转\n";
 		fout << "warpAffine(srcImage, middleImage2, " << Rotate << ", " << "srcImage.size());\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		Point2f center(middleImage2.cols / 2, middleImage2.rows / 2);
 		Mat Rotate = getRotationMatrix2D(center, dAngle, 1.0);
-
 		Rect2f bbox = RotatedRect(Point2f(), middleImage2.size(), dAngle).boundingRect2f();
 		Rotate.at<double>(0, 2) += bbox.width / 2.0 - middleImage2.cols / 2.0;
 		Rotate.at<double>(1, 2) += bbox.height / 2.0 - middleImage2.rows / 2.0;
-
 		warpAffine(middleImage2, middleImage1, Rotate, bbox.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "//旋转\n";
 		fout << "warpAffine(middleImage2, middleImage1, " << Rotate << ", " << "middleImage2.size());\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		Point2f center(middleImage1.cols / 2, middleImage1.rows / 2);
 		Mat Rotate = getRotationMatrix2D(center, dAngle, 1.0);
-
 		Rect2f bbox = RotatedRect(Point2f(), middleImage1.size(), dAngle).boundingRect2f();
 		Rotate.at<double>(0, 2) += bbox.width / 2.0 - middleImage1.cols / 2.0;
 		Rotate.at<double>(1, 2) += bbox.height / 2.0 - middleImage1.rows / 2.0;
-
 		warpAffine(middleImage1, middleImage2, Rotate, bbox.size());
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//旋转\n";
 		fout << "warpAffine(middleImage1, middleImage2, " << Rotate << ", " << "middleImage1.size());\n";
 	}
@@ -243,33 +229,30 @@ void ImageGeoTransform::OnBnClickedButtonimageflip()
 	int index = FlipCode.GetCurSel();
 	FlipCode.GetLBText(index, flipCode);
 	int dFlipCode = _ttoi(flipCode);
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		flip(srcImage, middleImage1, dFlipCode);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//图像翻转\n";
 		fout << "flip(srcImage, middleImage1, " << dFlipCode << "); \n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		flip(middleImage2, middleImage1, dFlipCode);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
 		fout << "//图像翻转\n";
 		fout << "flip(middleImage2, middleImage1, " << dFlipCode << "); \n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		flip(middleImage1, middleImage2, dFlipCode);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//图像翻转\n";
 		fout << "flip(middleImage1, middleImage2, " << dFlipCode << "); \n";
 	}
@@ -289,7 +272,6 @@ void ImageGeoTransform::OnBnClickedButtonimagescale()
 	int index = ImageScale.GetCurSel();
 	ImageScale.GetLBText(index, scale);
 	double dScale = _ttof(scale);
-
 	CWnd* cWnd = GetParent();  //获取父窗口句柄
 	//刷新picture控件 每次显示均只有当前的图像
 	cWnd->GetDlgItem(IDC_ShowMidImage1)->ShowWindow(FALSE);
@@ -297,31 +279,28 @@ void ImageGeoTransform::OnBnClickedButtonimagescale()
 	cWnd->GetDlgItem(IDC_ShowMidImage2)->ShowWindow(FALSE);
 	cWnd->GetDlgItem(IDC_ShowMidImage2)->ShowWindow(TRUE);
 
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		resize(srcImage, middleImage1, Size(round(srcImage.cols * dScale), round(srcImage.rows * dScale)), 0, 0, CV_INTER_LINEAR);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "resize(srcImage, middleImage1, Size(round(srcImage.cols * " << dScale << "), " << "round(srcImage.rows * " << dScale << ")), " << "0, 0, CV_INTER_LINEAR);\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		resize(middleImage2, middleImage1, Size(round(middleImage2.cols * dScale), round(middleImage2.rows * dScale)), 0, 0, CV_INTER_LINEAR);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "resize(middleImage2, middleImage1, Size(round(middleImage2.cols * " << dScale << "), " << "round(middleImage2.rows * " << dScale << ")), " << "0, 0, CV_INTER_LINEAR);\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		resize(middleImage1, middleImage2, Size(round(middleImage1.cols * dScale), round(middleImage1.rows * dScale)), 0, 0, CV_INTER_LINEAR);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
 		fout << "resize(middleImage1, middleImage2, Size(round(middleImage1.cols * " << dScale << "), " << "round(middleImage1.rows * " << dScale << ")), " << "0, 0, CV_INTER_LINEAR);\n";
 	}
 }
@@ -346,40 +325,36 @@ void ImageGeoTransform::OnBnClickedButtonimagesimilarity()
 	SimilarityScale.GetLBText(index, scale);
 	double dScale = _ttof(scale);
 	
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		Point2f center = Point2f(srcImage.cols / 2, srcImage.rows / 2);
 		Mat Sim = getRotationMatrix2D(center, dAngle, dScale);
 		warpAffine(srcImage, middleImage1, Sim, srcImage.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//相似变换\n";
 		fout << "warpAffine(srcImage, middleImage1, " << Sim << ", " << "srcImage.size());\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		Point2f center = Point2f(middleImage2.cols / 2, middleImage2.rows / 2);
 		Mat Sim = getRotationMatrix2D(center, dAngle, dScale);
 		warpAffine(middleImage2, middleImage1, Sim, middleImage2.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "//相似变换\n";
 		fout << "warpAffine(middleImage2, middleImage1, " << Sim << ", " << "middleImage2.size());\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		Point2f center = Point2f(middleImage1.cols / 2, middleImage1.rows / 2);
 		Mat Sim = getRotationMatrix2D(center, dAngle, dScale);
 		warpAffine(middleImage1, middleImage2, Sim, middleImage1.size());
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//相似变换\n";
 		fout << "warpAffine(middleImage1, middleImage2, " << Sim << ", " << "middleImage1.size());\n";
 	}
@@ -399,7 +374,7 @@ void ImageGeoTransform::OnBnClickedButtonimageperpective()
 		MessageBox(_T("请用鼠标左键标记透视变换的源点"));
 		return;
 	}
-	//获取保存在yaml文件中的四个源点的坐标
+	//获取保存在yaml文件中的四个源点的坐标  保存到变量srcPointsP中
 	for (YAML::const_iterator it = config["Points"].begin(); it != config["Points"].end(); ++it)
 	{
 		string points;
@@ -416,34 +391,31 @@ void ImageGeoTransform::OnBnClickedButtonimageperpective()
 	dstPoints[3] = Point2f(0, srcImage.rows);
 	
 	Mat Perspective = getPerspectiveTransform(srcPointsP, dstPoints);//由四个点对计算透视变换矩阵  
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
+
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		warpPerspective(srcImage, middleImage1, Perspective, srcImage.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//透视变换\n";
 		fout << "warpPerspective(srcImage, middleImage1, " << Perspective << ", " << "srcImage.size());\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		warpPerspective(srcImage, middleImage1, Perspective, middleImage2.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "//透视变换\n";
 		fout << "warpPerspective(middleImage2, middleImage1, " << Perspective << ", " << "middleImage2.size());\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		warpPerspective(srcImage, middleImage2, Perspective, middleImage1.size());
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//透视变换\n";
 		fout << "warpPerspective(middleImage1, middleImage2, " << Perspective << ", " << "middleImage1.size());\n";
 	}
@@ -464,34 +436,30 @@ void ImageGeoTransform::OnBnClickedButtonimageaffine()
 		return;
 	}
 	Mat Affine = getAffineTransform(srcPointsA, dstPointsA);//由三个点对计算透视变换矩阵  
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		warpAffine(srcImage, middleImage1, Affine, srcImage.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//仿射变换\n";
 		fout << "warpAffine(srcImage, middleImage1, " << Affine << ", " << "srcImage.size());\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		warpAffine(middleImage2, middleImage1, Affine, middleImage2.size());
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "//仿射变换\n";
 		fout << "warpAffine(middleImage2, middleImage1, " << Affine << ", " << "middleImage2.size());\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		warpAffine(middleImage1, middleImage2, Affine, middleImage1.size());
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "//仿射变换\n";
 		fout << "warpAffine(middleImage1, middleImage2, " << Affine << ", " << "middleImage1.size());\n";
 	}

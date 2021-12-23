@@ -95,29 +95,31 @@ void ImageSharpen::OnBnClickedButtonsobel()
 	index = XorY.GetCurSel();
 	XorY.GetLBText(index, xy);
 	int direction = _ttoi(xy);   //0表示x方向  1表示y方向
-	if (middleImage1.rows == 0 && middleImage2.rows == 0)
+	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
 		{
 			MessageBox(_T("当前图像为单通道图像，请选彩色图像"));
 			return;
 		}
-		GaussianBlur(srcImage, srcImage, Size(3, 3), 0, 0, BORDER_DEFAULT);
-		cvtColor(srcImage, srcImage, COLOR_BGR2GRAY);
+		GaussianBlur(srcImage, middleImage1, Size(3, 3), 0, 0, BORDER_DEFAULT);
+		cvtColor(middleImage1, middleImage1, COLOR_BGR2GRAY);
 		if (direction == 0)
 		{
-			Sobel(srcImage, middleImage1, CV_16S, 1, 0, ksize, scale, delta);
+			Sobel(middleImage1, middleImage1, CV_16S, 1, 0, ksize, scale, delta);	//X方向
 			fout << "Sobel(srcImage, middleImage1, CV_16S, 1, 0, " << ksize << ", " << scale << ", "<< delta << ");\n";
 		}	
 		else
 		{
-			Sobel(srcImage, middleImage1, CV_16S, 0, 1, ksize, scale, delta);
+			Sobel(middleImage1, middleImage1, CV_16S, 0, 1, ksize, scale, delta);	//Y方向
 			fout << "Sobel(srcImage, middleImage1, CV_16S, 0, 1, " << ksize << ", " << scale << ", " << delta << ");\n";
 		}
 		convertScaleAbs(middleImage1, middleImage1);
-		imshow(MiddleWindowName1, middleImage1);	
+		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
+		middleWindow1++;
 	}
-	else if (middleImage1.rows == 0 && middleImage2.rows != 0)
+	else if (middleWindow2 >= middleWindow1)
 	{
 		if (middleImage2.channels() != 3)
 		{
@@ -138,9 +140,10 @@ void ImageSharpen::OnBnClickedButtonsobel()
 		}
 		convertScaleAbs(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
-		middleImage1.rows = 0;
+		resultMidWindow1.push_back(middleImage1);
+		middleWindow1++;
 	}
-	else if (middleImage2.rows == 0 && middleImage1.rows != 0)
+	else if (middleWindow1 > middleWindow2)
 	{
 		if (middleImage1.channels() != 3)
 		{
@@ -161,7 +164,8 @@ void ImageSharpen::OnBnClickedButtonsobel()
 		}
 		convertScaleAbs(middleImage2, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
-		middleImage1.rows = 0;
+		resultMidWindow2.push_back(middleImage2);
+		middleWindow2++;
 	}
 }
 
@@ -178,9 +182,9 @@ void ImageSharpen::OnBnClickedButtonlaplacian()
 	CString sKize;
 	index = LaplacianKernel.GetCurSel();
 	LaplacianKernel.GetLBText(index, sKize);
-	int ksize = _ttoi(sKize);
+	int ksize = _ttoi(sKize);					//核大小
 
-	if (middleImage1.rows == 0 && middleImage2.rows == 0)
+	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
 		{
@@ -192,8 +196,10 @@ void ImageSharpen::OnBnClickedButtonlaplacian()
 		Laplacian(srcImage, middleImage1, CV_16S, ksize);
 		convertScaleAbs(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
+		middleWindow1++;
 	}
-	else if (middleImage1.rows == 0 && middleImage2.rows != 0)
+	else if (middleWindow2 >= middleWindow1)
 	{
 		if (middleImage2.channels() != 3)
 		{
@@ -205,9 +211,10 @@ void ImageSharpen::OnBnClickedButtonlaplacian()
 		Laplacian(middleImage2, middleImage1, CV_16S, ksize);
 		convertScaleAbs(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
-		middleImage1.rows = 0;
+		resultMidWindow1.push_back(middleImage1);
+		middleWindow1++;
 	}
-	else if (middleImage2.rows == 0 && middleImage1.rows != 0)
+	else if (middleWindow1 > middleWindow2)
 	{
 		if (middleImage1.channels() != 3)
 		{
@@ -219,6 +226,7 @@ void ImageSharpen::OnBnClickedButtonlaplacian()
 		Laplacian(middleImage1, middleImage2, CV_16S, ksize);
 		convertScaleAbs(middleImage2, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
-		middleImage1.rows = 0;
+		resultMidWindow2.push_back(middleImage2);
+		middleWindow2++;
 	}
 }

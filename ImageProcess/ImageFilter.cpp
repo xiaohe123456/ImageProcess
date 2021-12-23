@@ -43,8 +43,10 @@ BEGIN_MESSAGE_MAP(ImageFilter, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTONMedianFilter, &ImageFilter::OnBnClickedButtonmedianfilter)
 	ON_BN_CLICKED(IDC_BUTTONGaussianFilter, &ImageFilter::OnBnClickedButtongaussianfilter)
 	ON_BN_CLICKED(IDC_BUTTONBilateralFilter, &ImageFilter::OnBnClickedButtonbilateralfilter)
+	ON_BN_CLICKED(IDC_BUTTONIntroduceBox, &ImageFilter::OnBnClickedButtonintroducebox)
 END_MESSAGE_MAP()
 
+//初始化图像滤波的参数，设置初始值
 BOOL ImageFilter::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
@@ -103,7 +105,7 @@ boxFilter	(	InputArray 	src,		输入图像
 				int 	ddepth,			输出图像深度（-1或src.depth())
 				Size 	ksize,			滤波器核大小
 				Point 	anchor = Point(-1,-1),	锚点，默认Point(-1,-1) 表示核中心为锚点
-				bool 	normalize = true,	    是否归一化，默认为true，true表示归一化
+				bool 	normalize = true,	是否归一化，默认为true，true表示归一化  归一化后等价于均值滤波
 				int 	borderType = BORDER_DEFAULT  边界类型
 			)
 
@@ -120,37 +122,35 @@ void ImageFilter::OnBnClickedButtonboxfilter()
 	CString kSize;
 	MeanFilter.GetLBText(index, kSize);  //获取控件索引对应的值
 	int ksize = _ttoi(kSize);
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
-		boxFilter(srcImage, middleImage1, -1, Size(ksize, ksize));
+		boxFilter(srcImage, middleImage1, -1, Size(ksize, ksize), Point(-1,-1), false);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		imageFilter = middleImage1;
 		middleWindow1++;
 		fout << "boxFilter(srcImage, middleImage1, -1, Size(" << ksize << ", " << ksize <<"));\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagFilter == 1)
 			middleImage2 = srcImage;
-		boxFilter(middleImage2, middleImage1, -1, Size(ksize, ksize));
+		boxFilter(middleImage2, middleImage1, -1, Size(ksize, ksize), Point(-1, -1), false);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		//middleImage1.rows = 0;
 		fout << "boxFilter(middleImage2, middleImage1, -1, Size(" << ksize << ", " << ksize << "));\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagFilter == 1)
 			middleImage1 = srcImage;
-		boxFilter(middleImage1, middleImage2, -1, Size(ksize, ksize));
+		boxFilter(middleImage1, middleImage2, -1, Size(ksize, ksize), Point(-1, -1), false);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		//middleImage1.rows = 0;
 		fout << "boxFilter(middleImage1, middleImage2, -1, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	flagFilter = 1;
@@ -168,48 +168,44 @@ blur(InputArray 	src,  输入图像
 void ImageFilter::OnBnClickedButtonmeanfilter()
 {
 	// TODO: 在此添加控件通知处理程序代码
-
 	if (srcImage.empty())
 	{
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-
 	int index = MeanFilter.GetCurSel();  //获取控件索引
 	CString kSize;
 	MeanFilter.GetLBText(index, kSize);  //获取控件索引对应的值
 	int ksize = _ttoi(kSize);
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		blur(srcImage, middleImage1, Size(ksize, ksize));
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
 		fout << "blur(srcImage, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagFilter == 1)
 			middleImage2 = srcImage; 
 		blur(middleImage2, middleImage1, Size(ksize, ksize));
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		//middleImage2.rows = 0;
 		fout << "blur(middleImage2, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagFilter == 1)
 			middleImage1 = srcImage;
 		blur(middleImage1, middleImage2, Size(11, 11));
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		//middleImage1.rows = 0;
 		fout << "blur(middleImage1, middleImage2, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	flagFilter = 1;	
@@ -235,37 +231,35 @@ void ImageFilter::OnBnClickedButtonmedianfilter()
 	CString kSize;
 	MeanFilter.GetLBText(index, kSize);   //获取控件索引对应的值
 	int ksize = _ttoi(kSize);
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		medianBlur(srcImage, middleImage1, ksize);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
 		fout << "medianBlur(srcImage, middleImage1, " << ksize << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagFilter == 1)
 			middleImage2 = srcImage;
 		medianBlur(middleImage2, middleImage1, ksize);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		//middleImage2.rows = 0;
 		fout << "medianBlur(middleImage2, middleImage1, " << ksize << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagFilter == 1)
 			middleImage1 = srcImage;
 		medianBlur(middleImage1, middleImage2, ksize);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		//middleImage1.rows = 0;
 		fout << "medianBlur(middleImage1, middleImage2, " << ksize << ");\n";
 	}
 	flagFilter = 1;
@@ -303,38 +297,35 @@ void ImageFilter::OnBnClickedButtongaussianfilter()
 	GaussianFilterSigamaY.GetLBText(index, SigmaY);
 	int sigmaY = _ttoi(SigmaY);
 
-
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		GaussianBlur(srcImage, middleImage1, Size(ksize, ksize), sigmaX, sigmaY);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
 		fout << "GaussianBlur(srcImage, middleImage1, Size(" << ksize << ", " << ksize << "), " << sigmaX << ", " << sigmaY << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagFilter == 1)
 			middleImage2 = srcImage;
 		GaussianBlur(middleImage2, middleImage1, Size(ksize, ksize), sigmaX, sigmaY);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		//middleImage2.rows = 0;
 		fout << "GaussianBlur(middleImage2, middleImage1, Size(" << ksize << ", " << ksize << "), " << sigmaX << ", " << sigmaY << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagFilter == 1)
 			middleImage1 = srcImage;
 		GaussianBlur(middleImage1, middleImage2, Size(ksize, ksize), sigmaX, sigmaY);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		//middleImage1.rows = 0;
 		fout << "GaussianBlur(middleImage1, middleImage2, Size(" << ksize << ", " << ksize << "), " << sigmaX << ", " << sigmaY << ");\n";
 	}
 	flagFilter = 1;
@@ -356,7 +347,6 @@ bilateralFilter	(	InputArray 	src,        输入源图像
 void ImageFilter::OnBnClickedButtonbilateralfilter()
 {
 	// TODO: 在此添加控件通知处理程序代码
-
 	if (srcImage.empty())
 	{
 		MessageBox(_T("加载图片失败"));
@@ -377,41 +367,46 @@ void ImageFilter::OnBnClickedButtonbilateralfilter()
 	BilateralFilterLocateSigma.GetLBText(index, SigmaSpace);
 	int sigmaSpace = _ttoi(SigmaSpace);
 
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		bilateralFilter(srcImage, middleImage1, d, sigmaColor, sigmaSpace);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
 		fout << "双边滤波\n";
 		fout << "bilateralFilter(srcImage, middleImage1, " << d << ", " << sigmaColor << ", " << sigmaSpace << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagFilter == 1)
 			middleImage2 = srcImage;
 		bilateralFilter(middleImage2, middleImage1, d, sigmaColor, sigmaSpace);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		//middleImage2.rows = 0;
 		fout << "双边滤波\n";
 		fout << "bilateralFilter(middleImage2, middleImage1, " << d << ", " << sigmaColor << ", " << sigmaSpace << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagFilter == 1)
 			middleImage1 = srcImage;
 		bilateralFilter(middleImage1, middleImage2, d, sigmaColor, sigmaSpace);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		//middleImage1.rows = 0;
 		fout << "双边滤波\n";
 		fout << "bilateralFilter(middleImage1, middleImage2, " << d << ", " << sigmaColor << ", " << sigmaSpace << ");\n";
 	}
 	flagFilter = 1;
+}
+
+
+void ImageFilter::OnBnClickedButtonintroducebox()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("参数值越大，图像像素越亮"));
 }

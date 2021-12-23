@@ -160,9 +160,10 @@
 #define IDC_ImageSimilarity             1117
 #define IDC_BUTTONAdjustImageEnhance    1117
 #define IDC_STATICScaleAngle            1118
-#define IDC_BUTTONUndo                  1118
 #define IDC_BUTTONRevoke                1118
 #define IDC_STATICSimScale              1119
+#define IDC_BUTTON                      1119
+#define IDC_BUTTONIntroduceBox          1119
 #define IDC_ImagePerspective            1120
 #define IDC_BUTTONLineEnhance2          32813
 #define IDC_BUTTONGammaEnhance          32813
@@ -173,7 +174,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32814
-#define _APS_NEXT_CONTROL_VALUE         1119
+#define _APS_NEXT_CONTROL_VALUE         1120
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

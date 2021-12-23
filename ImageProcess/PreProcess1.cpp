@@ -39,8 +39,7 @@ END_MESSAGE_MAP()
 
 
 // PreProcess1 消息处理程序
-
-//默认的图像滤波方法  均值滤波
+//默认的图像滤波方法  高斯滤波
 void PreProcess1::OnBnClickedButtonimagefilter1()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -50,33 +49,31 @@ void PreProcess1::OnBnClickedButtonimagefilter1()
 		return;
 	}
 	int ksize = 5;
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
-		blur(srcImage, middleImage1, Size(ksize, ksize));
+		GaussianBlur(srcImage, middleImage1, Size(ksize, ksize), 0, 0);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
 		fout << "blur(srcImage, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
-		blur(middleImage2, middleImage1, Size(ksize, ksize));
+		GaussianBlur(srcImage, middleImage1, Size(ksize, ksize), 0, 0);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		//middleImage2.rows = 0;
 		fout << "blur(middleImage2, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
-		blur(middleImage1, middleImage2, Size(11, 11));
+		GaussianBlur(srcImage, middleImage1, Size(ksize, ksize), 0, 0);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		//middleImage1.rows = 0;
 		fout << "blur(middleImage1, middleImage2, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	flagFilter = 1;       //滤波处理标志位  默认滤波处理完后，如果效果不好，需要修改滤波方式，则对原图进行滤波处理
@@ -91,7 +88,6 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
@@ -102,11 +98,11 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		cvtColor(srcImage, srcImage, CV_BGR2GRAY);
 		equalizeHist(srcImage, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "//直方图均衡化\n";						//注释
 		fout << "equalizeHist(srcImage, middleImage1);\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		if (middleImage2.channels() != 3)
@@ -117,12 +113,11 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		cvtColor(middleImage2, middleImage2, CV_BGR2GRAY);
 		equalizeHist(middleImage2, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
 		fout << "//直方图均衡化\n";
 		fout << "equalizeHist(middleImage2, middleImage1);\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		if (middleImage1.channels() != 3)
@@ -133,8 +128,8 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		cvtColor(middleImage1, middleImage1, CV_BGR2GRAY);
 		equalizeHist(middleImage1, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage1);
 		middleWindow2++;
-		//middleImage1.rows = 0;
 		fout << "//直方图均衡化\n";
 		fout << "equalizeHist(middleImage1, middleImage2);\n";
 	}
@@ -142,16 +137,15 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 }
 
 
-//图像滤波调整
+//图像滤波调整界面
 void PreProcess1::OnBnClickedButtonadjustfilter()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	ImageFilter ImageFilterDlg;
 	ImageFilterDlg.DoModal();
-
 }
 
-//图像增强调整
+//图像增强调整界面
 void PreProcess1::OnBnClickedButtonenhanceadjust1()
 {
 	// TODO: 在此添加控件通知处理程序代码

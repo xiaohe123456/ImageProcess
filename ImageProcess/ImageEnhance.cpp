@@ -52,13 +52,12 @@ BEGIN_MESSAGE_MAP(ImageEnhance, CDialogEx)
 END_MESSAGE_MAP()
 
 
-
+//初始化图像增强中的参数，设置初值
 BOOL ImageEnhance::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	CString str;
 	int i = 0;
-	//设置方框、均值和中值滤波器核控件的大小
 	while (i < 255)
 	{
 		str.Format(_T("%d"), i);
@@ -117,10 +116,8 @@ BOOL ImageEnhance::OnInitDialog()
 	GammaCof.SetCurSel(0);
 	GammaIndex.SetCurSel(10);
 	LogC.SetCurSel(0);
-
 	return 0;
 }
-
 
 // ImageEnhance 消息处理程序
 //线性增强
@@ -134,11 +131,9 @@ void ImageEnhanceLine(Mat src, Mat& dst, double kk, double bb)
 			{
 				for (int c = 0; c < 3; c++)
 					dst.at<Vec3b>(i, j)[c] = saturate_cast<uchar>(kk * (src.at<Vec3b>(i, j)[c]) + bb);
-
 			}
 		}
 	}
-
 }
 
 //图像对比度增强 （线性）
@@ -159,16 +154,15 @@ void ImageEnhance::OnBnClickedButtonlineenhance()
 	LineK.GetLBText(index, b);
 	double kk = _ttof(k);  //CString 转为double类型
 	double bb = _ttof(b);
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		middleImage1 = Mat::zeros(Size(srcImage.cols, srcImage.rows), srcImage.type());
 		ImageEnhanceLine(srcImage, middleImage1, kk, bb);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "ImageEnhanceLine(srcImage, middleImage1, " << kk << ", " << bb << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -178,12 +172,10 @@ void ImageEnhance::OnBnClickedButtonlineenhance()
 		middleImage1 = Mat::zeros(Size(srcImage.cols, srcImage.rows), srcImage.type());
 		ImageEnhanceLine(middleImage2, middleImage1, kk, bb);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "ImageEnhanceLine(middleImage2, middleImage1, " << kk << ", " << bb << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -193,22 +185,19 @@ void ImageEnhance::OnBnClickedButtonlineenhance()
 		middleImage2 = Mat::zeros(Size(srcImage.cols, srcImage.rows), srcImage.type());
 		ImageEnhanceLine(middleImage1, middleImage2, kk, bb);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "ImageEnhanceLine(middleImage1, middleImage2, " << kk << ", " << bb << ");\n";
 	}
 	flagEnhance = 1;
 }
 
-
+//伽马变换
 void GammaEnhance(Mat src, Mat& dst, double dc, double dGamma)
 {
 	src.convertTo(dst, CV_64F, 1.0 / 255, 0);  //归一化
 	pow(dst, dGamma, dst);
-
 }
-
 /*
 * 伽马变换对于图像对比度偏低，并且整体亮度值偏高的情况图像增强效果明显，通过调节gamma值
 * gamma<1时提高图像暗区域的对比度，而降低亮区域的对比度；gamma>1时提高亮区域的对比度，降低暗区域的对比度
@@ -232,15 +221,14 @@ void ImageEnhance::OnBnClickedButtongammaenhance()
 	double dc = _ttof(c);     //伽马变换系数
 	double dGamma = _ttof(g);   //指数
 
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if(middleWindow1 == 0 && middleWindow2 ==0)
 	{
 		GammaEnhance(srcImage, middleImage1, dc, dGamma);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "GammaEnhance(srcImage, middleImage1, " << dc << ", " << dGamma << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -249,12 +237,10 @@ void ImageEnhance::OnBnClickedButtongammaenhance()
 			middleImage2 = imageFilter;
 		GammaEnhance(middleImage2, middleImage1, dc, dGamma);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "GammaEnhance(middleImage2, middleImage1, " << dc << ", " << dGamma << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -263,9 +249,8 @@ void ImageEnhance::OnBnClickedButtongammaenhance()
 			middleImage1 = imageFilter;
 		GammaEnhance(middleImage1, middleImage2, dc, dGamma);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "GammaEnhance(middleImage1, middleImage2, " << dc << ", " << dGamma << ");\n";
 	}
 	flagEnhance = 1;
@@ -280,7 +265,6 @@ void ImageEnhance::OnBnClickedButtonequhist()
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
@@ -291,11 +275,11 @@ void ImageEnhance::OnBnClickedButtonequhist()
 		cvtColor(srcImage, middleImage1, CV_BGR2GRAY);
 		equalizeHist(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "//直方图均衡化\n";						//注释
+		fout << "//直方图均衡化\n";						
 		fout << "equalizeHist(middleImage1, middleImage1);\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -310,12 +294,11 @@ void ImageEnhance::OnBnClickedButtonequhist()
 		cvtColor(middleImage2, middleImage2, CV_BGR2GRAY);
 		equalizeHist(middleImage2, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-		fout << "//直方图均衡化\n";						//注释
+		fout << "//直方图均衡化\n";						
 		fout << "equalizeHist(middleImage1, middleImage1);\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -330,15 +313,15 @@ void ImageEnhance::OnBnClickedButtonequhist()
 		cvtColor(middleImage1, middleImage1, CV_BGR2GRAY);
 		equalizeHist(middleImage1, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-		fout << "//直方图均衡化\n";						//注释
+		fout << "//直方图均衡化\n";						
 		fout << "equalizeHist(middleImage2, middleImage2);\n";
 	}
 	flagEnhance = 1;
 }
 
-
+//对数变换
 void LogEnhance(Mat src, Mat& dst, double c)
 {
 	add(src, Scalar(1.0), src);
@@ -362,16 +345,15 @@ void ImageEnhance::OnBnClickedButtonlogenhance()
 	int index = LogC.GetCurSel();
 	LogC.GetLBText(index, c);
 	double dc = _ttof(c);     //对数变换系数
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		middleImage1 = Mat::zeros(Size(srcImage.rows, srcImage.cols), srcImage.type());
 		LogEnhance(srcImage, middleImage1, dc);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "LogEnhance(srcImage, middleImage1, " << dc << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if(middleWindow2 >= middleWindow1)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -380,12 +362,10 @@ void ImageEnhance::OnBnClickedButtonlogenhance()
 			middleImage2 = imageFilter;
 		LogEnhance(middleImage2, middleImage1, dc);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "LogEnhance(middleImage2, middleImage1, " << dc << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -394,15 +374,14 @@ void ImageEnhance::OnBnClickedButtonlogenhance()
 			middleImage1 = imageFilter;
 		LogEnhance(middleImage1, middleImage2, dc);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "LogEnhance(middleImage1, middleImage2, " << dc << ");\n";
 	}
 	flagEnhance = 1;
 }
 
-
+//分段线性变换
 void SegLineEnhance(Mat src, Mat& dst, double k1, double k2, double b1, double b2, double seg1, double seg2)
 {
 	for (int i = 0; i < src.rows; i++)
@@ -444,24 +423,22 @@ void ImageEnhance::OnBnClickedButtonsegline()
 	SegLineGray1.GetLBText(index, seg1);
 	index = SegLineGray2.GetCurSel();
 	SegLineGray2.GetLBText(index, seg2);
-
-	double dk1 = _ttof(k1);     //分段变换斜率k1
-	double db1 = _ttof(b1);     //分段变换焦距b1
-	double dk2 = _ttof(k2);     //分段变换斜率k2
-	double db2 = _ttof(b2);     //分段变换焦距b2
+	double dk1 = _ttof(k1);			//分段变换斜率k1
+	double db1 = _ttof(b1);			//分段变换焦距b1
+	double dk2 = _ttof(k2);			//分段变换斜率k2
+	double db2 = _ttof(b2);			//分段变换焦距b2
 	double dSeg1 = _ttof(seg1);     //分段变换分段值1
 	double dSeg2 = _ttof(seg2);     //分段变换分段值2
 
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
 	if (middleWindow1 ==0 && middleWindow2 == 0)
 	{
 		middleImage1 = Mat::zeros(Size(srcImage.cols, srcImage.rows), srcImage.type());
 		SegLineEnhance(srcImage, middleImage1, dk1, dk2, db1, db2, dSeg1, dSeg2);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		fout << "SegLineEnhance(srcImage, middleImage1, " << dk1 << ", " << dk2 << ", " << db1 << ", " << db2 << ", " << dSeg1 << ", " << dSeg2 << ");\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -471,12 +448,10 @@ void ImageEnhance::OnBnClickedButtonsegline()
 		middleImage1 = Mat::zeros(Size(middleImage2.cols, middleImage2.rows), srcImage.type());
 		SegLineEnhance(middleImage2, middleImage1, dk1, dk2, db1, db2, dSeg1, dSeg2);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
 		fout << "SegLineEnhance(middleImage2, middleImage1, " << dk1 << ", " << dk2 << ", " << db1 << ", " << db2 << ", " << dSeg1 << ", " << dSeg2 << ");\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if (middleWindow1 > middleWindow2)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -486,9 +461,8 @@ void ImageEnhance::OnBnClickedButtonsegline()
 		middleImage2 = Mat::zeros(Size(middleImage1.cols, middleImage1.rows), srcImage.type());
 		SegLineEnhance(middleImage1, middleImage2, dk1, dk2, db1, db2, dSeg1, dSeg2);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
 		fout << "SegLineEnhance(middleImage1, middleImage2, " << dk1 << ", " << dk2 << ", " << db1 << ", " << db2 << ", " << dSeg1 << ", " << dSeg2 << ");\n";
 	}
 	flagEnhance = 1;
@@ -510,9 +484,8 @@ void ImageEnhance::OnBnClickedButtonclahe()
 	ContrastThresh.GetLBText(index, threshold);
 	index = EqualizeGrid.GetCurSel();
 	EqualizeGrid.GetLBText(index, grid);
-	double dThreshold = _ttof(threshold);     //对比度阈值
-	double dGrid = _ttof(grid);     //对比度阈值
-	//if (middleImage1.rows == 0 && middleImage2.rows == 0)
+	double dThreshold = _ttof(threshold);		//对比度阈值
+	double dGrid = _ttof(grid);					//对比度网格大小
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
@@ -524,11 +497,11 @@ void ImageEnhance::OnBnClickedButtonclahe()
 		Ptr<CLAHE> clathe = createCLAHE(dThreshold, Size(dGrid, dGrid));
 		clathe->apply(srcImage, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "//自适应直方图均衡化\n";  //注释
+		fout << "//自适应直方图均衡化\n";  
 		fout << "Ptr<CLAHE> clathe = createCLAHE(" << dThreshold << ", Size(" << dGrid << ", " << dGrid << "));\n";
 	}
-	//else if (middleImage1.rows == 0 && middleImage2.rows != 0)
 	else if (middleWindow2 >= middleWindow1)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -544,13 +517,11 @@ void ImageEnhance::OnBnClickedButtonclahe()
 		Ptr<CLAHE> clathe = createCLAHE(dThreshold, Size(dGrid, dGrid));
 		clathe->apply(middleImage2, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
+		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		//middleImage2.rows = 0;
-
-		fout << "//自适应直方图均衡化\n";  //注释
+		fout << "//自适应直方图均衡化\n";  
 		fout << "Ptr<CLAHE> clathe = createCLAHE(" << dThreshold << ", Size(" << dGrid << ", " << dGrid << "));\n";
 	}
-	//else if (middleImage2.rows == 0 && middleImage1.rows != 0)
 	else if(middleWindow1 > middleWindow2)
 	{
 		if (flagEnhance == 1 && flagFilter == 0)
@@ -566,12 +537,10 @@ void ImageEnhance::OnBnClickedButtonclahe()
 		Ptr<CLAHE> clathe = createCLAHE(dThreshold, Size(dGrid, dGrid));
 		clathe->apply(middleImage1, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
+		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		//middleImage1.rows = 0;
-
-		fout << "//自适应直方图均衡化\n";  //注释
+		fout << "//自适应直方图均衡化\n";  
 		fout << "Ptr<CLAHE> clathe = createCLAHE(" << dThreshold << ", Size(" << dGrid << ", " << dGrid << "));\n";
 	}
 	flagEnhance = 1;
 }
-

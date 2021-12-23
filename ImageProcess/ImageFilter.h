@@ -50,4 +50,5 @@ public:
 	CComboBox BilateralFilterColor;
 	// 双边滤波的坐标空间Sigma
 	CComboBox BilateralFilterLocateSigma;
+	afx_msg void OnBnClickedButtonintroducebox();
 };

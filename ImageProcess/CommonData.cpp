@@ -7,7 +7,11 @@ Mat middleImage1;
 Mat middleImage2;
 Mat dstImage;
 Mat imageFilter;				
-Mat imageEnhance;				
+Mat imageEnhance;	
+
+vector<Mat> resultMidWindow1;
+vector<Mat> resultMidWindow2;
+
 string OriginalWindowName = "ImageShowOriginal";  //显示原图像窗口
 string MiddleWindowName1 = "ImageShowMiddle1";    //显示中间结果窗口1
 string MiddleWindowName2 = "ImageShowMiddle2";    //显示中间结果窗口2

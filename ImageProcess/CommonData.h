@@ -13,6 +13,9 @@ extern string OriginalWindowName;		//显示原图像窗口
 extern string MiddleWindowName1 ;		//显示中间结果窗口1
 extern string MiddleWindowName2 ;		//显示中间结果窗口2
 
+extern vector<Mat> resultMidWindow1;	//保存中间窗口1的结果图像
+extern vector<Mat> resultMidWindow2;	//保存中间窗口2的结果图像
+
 extern string pathName;		//读取图像的路径及文件名
 extern CString str;			//yaml文件名
 

@@ -44,9 +44,9 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-	int lowThresh = GetDlgItemInt(IDC_EDITCannyLowThresh);
-	int highThresh = GetDlgItemInt(IDC_EDITCannyHighThresh);
-	if (middleImage1.rows == 0 && middleImage2.rows == 0)
+	int lowThresh = GetDlgItemInt(IDC_EDITCannyLowThresh);		//Canny边缘检测低阈值
+	int highThresh = GetDlgItemInt(IDC_EDITCannyHighThresh);	//高阈值
+	if (middleWindow1 == 0 &&middleWindow2 == 0)
 	{
 		if (srcImage.channels() != 3)
 		{
@@ -56,11 +56,11 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		cvtColor(srcImage, middleImage1, CV_BGR2GRAY);
 		Canny(srcImage, middleImage1, lowThresh, highThresh, 3);
 		imshow(MiddleWindowName1, middleImage1);
-
+		resultMidWindow1.push_back(middleImage1);
+		middleWindow1++;
 		fout << "Canny(srcImage, middleImage1, " << lowThresh << ", " << highThresh << ", 3);\n";
-
 	}
-	else if (middleImage1.rows == 0 && middleImage2.rows != 0)
+	else if (middleWindow2 >= middleWindow1)
 	{
 		if (middleImage2.channels() != 3)
 		{
@@ -70,11 +70,11 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		cvtColor(middleImage2, middleImage2, CV_BGR2GRAY);
 		Canny(middleImage2, middleImage1, lowThresh, highThresh, 3);
 		imshow(MiddleWindowName1, middleImage1);
-		middleImage2.rows = 0;
-
+		resultMidWindow1.push_back(middleImage1);
+		middleWindow1++;
 		fout << "Canny(middleImage2, middleImage1, " << lowThresh << ", " << highThresh << ", 3);\n";
 	}
-	else if (middleImage2.rows == 0 && middleImage1.rows != 0)
+	else if (middleWindow1 > middleWindow2)
 	{
 		if (middleImage1.channels() != 3)
 		{
@@ -84,8 +84,8 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		cvtColor(middleImage1, middleImage1, CV_BGR2GRAY);
 		Canny(middleImage1, middleImage2, lowThresh, highThresh, 3);
 		imshow(MiddleWindowName2, middleImage2);
-		middleImage1.rows = 0;
-
+		resultMidWindow2.push_back(middleImage2);
+		middleWindow2++;
 		fout << "Canny(middleImage1, middleImage2, " << lowThresh << ", " << highThresh << ", 3);\n";
 	}
 }
