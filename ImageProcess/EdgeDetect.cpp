@@ -58,7 +58,6 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "Canny(srcImage, middleImage1, " << lowThresh << ", " << highThresh << ", 3);\n";
 	}
 	else if (middleWindow2 >= middleWindow1)
 	{
@@ -72,7 +71,6 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "Canny(middleImage2, middleImage1, " << lowThresh << ", " << highThresh << ", 3);\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -86,6 +84,11 @@ void EdgeDetect::OnBnClickedButtoncanny()
 		imshow(MiddleWindowName2, middleImage2);
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		fout << "Canny(middleImage1, middleImage2, " << lowThresh << ", " << highThresh << ", 3);\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "Canny" << "effect" << "image edge detection";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "low" << lowThresh << "low" << highThresh;
+	fs_write << "}";
 }

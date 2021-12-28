@@ -56,7 +56,6 @@ void PreProcess1::OnBnClickedButtonimagefilter1()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "blur(srcImage, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	else if(middleWindow2 >= middleWindow1)
 	{
@@ -65,7 +64,6 @@ void PreProcess1::OnBnClickedButtonimagefilter1()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "blur(middleImage2, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	else if(middleWindow1 > middleWindow2)
 	{
@@ -74,8 +72,13 @@ void PreProcess1::OnBnClickedButtonimagefilter1()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		fout << "blur(middleImage1, middleImage2, Size(" << ksize << ", " << ksize << "));\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "GaussianBlur" << "effect" << "image gaussian filter";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "ksize" << ksize;
+	fs_write << "}";
 	flagFilter = 1;       //滤波处理标志位  默认滤波处理完后，如果效果不好，需要修改滤波方式，则对原图进行滤波处理
 }
 
@@ -100,8 +103,6 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "//直方图均衡化\n";						//注释
-		fout << "equalizeHist(srcImage, middleImage1);\n";
 	}
 	else if(middleWindow2 >= middleWindow1)
 	{
@@ -115,8 +116,6 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "//直方图均衡化\n";
-		fout << "equalizeHist(middleImage2, middleImage1);\n";
 	}
 	else if(middleWindow1 > middleWindow2)
 	{
@@ -130,9 +129,10 @@ void PreProcess1::OnBnClickedButtonimageenhance1()
 		imshow(MiddleWindowName2, middleImage2);
 		resultMidWindow2.push_back(middleImage1);
 		middleWindow2++;
-		fout << "//直方图均衡化\n";
-		fout << "equalizeHist(middleImage1, middleImage2);\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write <<"function" << "equalizeHist" << "effect" << "image histogram equalization";
+	fs_write << "}";
 	flagEnhance = 1;       //图像增强处理标志位  默认图像增强方式处理完后，如果效果不好，需要修改增强方式，则对原图进行图像增强处理
 }
 

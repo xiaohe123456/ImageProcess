@@ -44,6 +44,10 @@ BEGIN_MESSAGE_MAP(ImageFilter, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTONGaussianFilter, &ImageFilter::OnBnClickedButtongaussianfilter)
 	ON_BN_CLICKED(IDC_BUTTONBilateralFilter, &ImageFilter::OnBnClickedButtonbilateralfilter)
 	ON_BN_CLICKED(IDC_BUTTONIntroduceBox, &ImageFilter::OnBnClickedButtonintroducebox)
+	ON_BN_CLICKED(IDC_BUTTONIntroduceBlur, &ImageFilter::OnBnClickedButtonintroduceblur)
+	ON_BN_CLICKED(IDC_BUTTONIntroduceMedian, &ImageFilter::OnBnClickedButtonintroducemedian)
+	ON_BN_CLICKED(IDC_BUTTONIntroduceGaussian, &ImageFilter::OnBnClickedButtonintroducegaussian)
+	ON_BN_CLICKED(IDC_BUTTONIntroduceBilateral, &ImageFilter::OnBnClickedButtonintroducebilateral)
 END_MESSAGE_MAP()
 
 //初始化图像滤波的参数，设置初始值
@@ -60,7 +64,7 @@ BOOL ImageFilter::OnInitDialog()
 		MeanFilter.AddString(str);
 		MedianFilter.AddString(str);
 		GaussianFilterKernel.AddString(str);
-		i += 2;
+		i += 1;
 	}
 	BoxFilter.SetCurSel(2);
 	MeanFilter.SetCurSel(2);
@@ -120,7 +124,7 @@ void ImageFilter::OnBnClickedButtonboxfilter()
 	}
 	int index = BoxFilter.GetCurSel();   //获取控件索引
 	CString kSize;
-	MeanFilter.GetLBText(index, kSize);  //获取控件索引对应的值
+	BoxFilter.GetLBText(index, kSize);  //获取控件索引对应的值
 	int ksize = _ttoi(kSize);
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
@@ -129,7 +133,6 @@ void ImageFilter::OnBnClickedButtonboxfilter()
 		resultMidWindow1.push_back(middleImage1);
 		imageFilter = middleImage1;
 		middleWindow1++;
-		fout << "boxFilter(srcImage, middleImage1, -1, Size(" << ksize << ", " << ksize <<"));\n";
 	}
 	else if (middleWindow2 >= middleWindow1)
 	{
@@ -140,7 +143,6 @@ void ImageFilter::OnBnClickedButtonboxfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "boxFilter(middleImage2, middleImage1, -1, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -151,8 +153,11 @@ void ImageFilter::OnBnClickedButtonboxfilter()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		fout << "boxFilter(middleImage1, middleImage2, -1, Size(" << ksize << ", " << ksize << "));\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write <<  "function" << "boxFilter" << "effect" << "image box filter";
+	fs_write << "}";
+	fs_write << "Param" << "{" << "kSize" << ksize << "}";
 	flagFilter = 1;
 }
 
@@ -184,7 +189,6 @@ void ImageFilter::OnBnClickedButtonmeanfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "blur(srcImage, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	else if (middleWindow2 >= middleWindow1)
 	{
@@ -195,7 +199,6 @@ void ImageFilter::OnBnClickedButtonmeanfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "blur(middleImage2, middleImage1, Size(" << ksize << ", " << ksize << "));\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -206,8 +209,11 @@ void ImageFilter::OnBnClickedButtonmeanfilter()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		fout << "blur(middleImage1, middleImage2, Size(" << ksize << ", " << ksize << "));\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "blur" << "effect" << "image blur filter";
+	fs_write << "}";
+	fs_write << "Param" << "{" << "kSize" << ksize << "}";
 	flagFilter = 1;	
 }
 
@@ -229,7 +235,7 @@ void ImageFilter::OnBnClickedButtonmedianfilter()
 	}
 	int index = MedianFilter.GetCurSel();  //获取控件索引
 	CString kSize;
-	MeanFilter.GetLBText(index, kSize);   //获取控件索引对应的值
+	MedianFilter.GetLBText(index, kSize);   //获取控件索引对应的值
 	int ksize = _ttoi(kSize);
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
@@ -238,7 +244,6 @@ void ImageFilter::OnBnClickedButtonmedianfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "medianBlur(srcImage, middleImage1, " << ksize << ");\n";
 	}
 	else if (middleWindow2 >= middleWindow1)
 	{
@@ -249,7 +254,6 @@ void ImageFilter::OnBnClickedButtonmedianfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "medianBlur(middleImage2, middleImage1, " << ksize << ");\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -260,8 +264,11 @@ void ImageFilter::OnBnClickedButtonmedianfilter()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		fout << "medianBlur(middleImage1, middleImage2, " << ksize << ");\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "medianBlur" << "effect" << "image median filter";
+	fs_write << "}";
+	fs_write << "Param" << "{" << "kSize" << ksize << "}";
 	flagFilter = 1;
 }
 
@@ -304,7 +311,6 @@ void ImageFilter::OnBnClickedButtongaussianfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "GaussianBlur(srcImage, middleImage1, Size(" << ksize << ", " << ksize << "), " << sigmaX << ", " << sigmaY << ");\n";
 	}
 	else if (middleWindow2 >= middleWindow1)
 	{
@@ -315,7 +321,6 @@ void ImageFilter::OnBnClickedButtongaussianfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "GaussianBlur(middleImage2, middleImage1, Size(" << ksize << ", " << ksize << "), " << sigmaX << ", " << sigmaY << ");\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -326,8 +331,13 @@ void ImageFilter::OnBnClickedButtongaussianfilter()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		fout << "GaussianBlur(middleImage1, middleImage2, Size(" << ksize << ", " << ksize << "), " << sigmaX << ", " << sigmaY << ");\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write <<  "function" << "GaussianBlur" << "effect" << "image gaussian filter";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "ksize" << ksize << "sigmaX" << sigmaX << "sigmaY" << sigmaY;
+	fs_write << "}";
 	flagFilter = 1;
 }
 
@@ -374,8 +384,6 @@ void ImageFilter::OnBnClickedButtonbilateralfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "双边滤波\n";
-		fout << "bilateralFilter(srcImage, middleImage1, " << d << ", " << sigmaColor << ", " << sigmaSpace << ");\n";
 	}
 	else if (middleWindow2 >= middleWindow1)
 	{
@@ -386,8 +394,6 @@ void ImageFilter::OnBnClickedButtonbilateralfilter()
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
 		imageFilter = middleImage1;
-		fout << "双边滤波\n";
-		fout << "bilateralFilter(middleImage2, middleImage1, " << d << ", " << sigmaColor << ", " << sigmaSpace << ");\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -398,15 +404,49 @@ void ImageFilter::OnBnClickedButtonbilateralfilter()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 		imageFilter = middleImage2;
-		fout << "双边滤波\n";
-		fout << "bilateralFilter(middleImage1, middleImage2, " << d << ", " << sigmaColor << ", " << sigmaSpace << ");\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "bilateralFilter" << "effect" << "image bilateral filter";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "d" << d << "sigmaColor" << sigmaColor << "sigmaSpace" << sigmaSpace;
+	fs_write << "}";
 	flagFilter = 1;
 }
 
-
+//方框滤波 参数说明
 void ImageFilter::OnBnClickedButtonintroducebox()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	MessageBox(_T("参数值越大，图像像素越亮"));
+}
+
+//均值滤波  参数说明
+void ImageFilter::OnBnClickedButtonintroduceblur()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("参数值越大，图像越模糊，一般为奇数"));
+}
+
+//中值滤波  参数说明
+void ImageFilter::OnBnClickedButtonintroducemedian()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("中值滤波对去除斑点噪声和椒盐噪声有较好的效果。参数只能为大于1的奇数，且参数值越大，图像越模糊"));
+}
+
+//高斯滤波  参数说明
+void ImageFilter::OnBnClickedButtonintroducegaussian()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("高斯滤波对于去除高斯噪声有较好效果。高斯核必须为正数且为奇数，且高斯核越大，结果图像\
+					越模糊"));
+}
+
+//双边滤波  参数说明
+void ImageFilter::OnBnClickedButtonintroducebilateral()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("双边滤波可以去噪保边。像素邻域直径一般设为5，大于5速度会很慢，对需要过滤大量噪声\
+				的离线程序可以设为9。sigma值越大，边缘越模糊"));
 }

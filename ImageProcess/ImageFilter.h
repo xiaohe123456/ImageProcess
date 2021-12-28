@@ -51,4 +51,8 @@ public:
 	// 双边滤波的坐标空间Sigma
 	CComboBox BilateralFilterLocateSigma;
 	afx_msg void OnBnClickedButtonintroducebox();
+	afx_msg void OnBnClickedButtonintroduceblur();
+	afx_msg void OnBnClickedButtonintroducemedian();
+	afx_msg void OnBnClickedButtonintroducegaussian();
+	afx_msg void OnBnClickedButtonintroducebilateral();
 };

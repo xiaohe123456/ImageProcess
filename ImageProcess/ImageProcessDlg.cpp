@@ -69,7 +69,6 @@ void CImageProcessDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_SLIDERSmall, MinThreshold);
 	DDX_Control(pDX, IDC_SLIDERBig, MaxThreshold);
-
 }
 
 BEGIN_MESSAGE_MAP(CImageProcessDlg, CDialogEx)
@@ -86,10 +85,10 @@ BEGIN_MESSAGE_MAP(CImageProcessDlg, CDialogEx)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_SLIDERBig, &CImageProcessDlg::OnNMCustomdrawSliderbig)
 	ON_WM_HSCROLL()
 	ON_BN_CLICKED(IDC_BUTTONBinary, &CImageProcessDlg::OnBnClickedButtonbinary)
-	ON_BN_CLICKED(IDC_BUTTONEdgeDetect, &CImageProcessDlg::OnBnClickedButtonedgedetect)
+	//ON_BN_CLICKED(IDC_BUTTONEdgeDetect, &CImageProcessDlg::OnBnClickedButtonedgedetect)
 	ON_BN_CLICKED(IDC_BUTTONPreProcess1, &CImageProcessDlg::OnBnClickedButtonpreprocess1)
 	ON_BN_CLICKED(IDC_BUTTONPreProcess2, &CImageProcessDlg::OnBnClickedButtonpreprocess2)
-	ON_BN_CLICKED(IDC_BUTTONImageSharpen, &CImageProcessDlg::OnBnClickedButtonimagesharpen)
+	//ON_BN_CLICKED(IDC_BUTTONImageSharpen, &CImageProcessDlg::OnBnClickedButtonimagesharpen)
 	ON_BN_CLICKED(IDC_BUTTONNextImage, &CImageProcessDlg::OnBnClickedButtonnextimage)
 	ON_WM_MOUSEWHEEL()
 
@@ -343,7 +342,7 @@ void CImageProcessDlg::OnBnClickedButtonsaveimage()
 		imwrite(mPath, middleImage2);
 	else
 		MessageBox(_T("error"));
-	fout.close();
+	fs_write.release();
 }
 
 
@@ -367,7 +366,6 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "cvtColor(srcImage, middleImage1, CV_BGR2GRAY);\n"; 
 	}
 	else if ((middleWindow1 == middleWindow2) || (middleWindow2 > middleWindow1))
 	{
@@ -380,7 +378,6 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "cvtColor(middleImage2, middleImage1, CV_BGR2GRAY);\n";
 	}
 	else if(middleWindow1 > middleWindow2)
 	{
@@ -392,9 +389,10 @@ void CImageProcessDlg::OnBnClickedButtonimagegray()
 		cvtColor(middleImage1, middleImage2, CV_BGR2GRAY);
 		imshow(MiddleWindowName2, middleImage2);
 		resultMidWindow2.push_back(middleImage2);
-		middleWindow2++;
-		fout << "cvtColor(middleImage1, middleImage2, CV_BGR2GRAY);\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "cvtColor" << "effect" << "image graying";
+	fs_write << "}";
 }
 
 //按钮 二值化  
@@ -414,7 +412,6 @@ void CImageProcessDlg::OnBnClickedButtonbinary()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "threshold(srcImage, middleImage1, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
 	}
 	else if ((middleWindow1 == middleWindow2) || (middleWindow2 > middleWindow1))
 	{
@@ -422,7 +419,6 @@ void CImageProcessDlg::OnBnClickedButtonbinary()
 		imshow(MiddleWindowName1, middleImage1);
 		resultMidWindow1.push_back(middleImage1);
 		middleWindow1++;
-		fout << "threshold(middleImage2, middleImage1, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
 	}
 	else if (middleWindow1 > middleWindow2)
 	{
@@ -430,8 +426,13 @@ void CImageProcessDlg::OnBnClickedButtonbinary()
 		imshow(MiddleWindowName2, middleImage2);
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
-		fout << "threshold(middleImage1, middleImage2, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "threshold" << "effect" << "image binarization";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "thresholdMin" << thresholdMin << "thresholdMax" << thresholdMax;
+	fs_write << "}";
 }
 
 
@@ -471,7 +472,12 @@ void CImageProcessDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar
 	threshold(srcImage, middleImage1, thresholdMin, thresholdMax, THRESH_BINARY);
 	imshow(MiddleWindowName1, middleImage1);
 
-	fout << "threshold(srcImage, middleImage1, " << thresholdMin << ", " << thresholdMax << ", THRESH_BINARY);\n";
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "threshold" << "effect" << "image binarization";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "thresholdMin" << thresholdMin << "thresholdMax" << thresholdMax;
+	fs_write << "}"; 
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
@@ -497,15 +503,6 @@ void CImageProcessDlg::OnBnClickedButtonimagegeotransform()
 	// TODO: 在此添加控件通知处理程序代码
 	ImageGeoTransform ImageGeoTransformDlg;
 	ImageGeoTransformDlg.DoModal();
-}
-
-
-//边缘检测
-void CImageProcessDlg::OnBnClickedButtonedgedetect()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	EdgeDetect EdgeDetectDlg;
-	EdgeDetectDlg.DoModal();
 }
 
 //图像处理1
@@ -544,26 +541,8 @@ void on_mouse(int event, int x, int y, int flags, void* ustc)
 	{
 		srcPoints[countL] = Point(x, y);
 		sprintf_s(locate, "(%d,%d)", x, y);  //将数据格式化输出到字符串
-
-		if (countL == 0)						//在yaml文件中设置Node结点,表示选中源点的坐标
-		{				
-			config["Points"]["0"] = locate;		//在yaml文件中以如下格式显示
-		}										//Points:									
-		if (countL == 1)						//	0: (138, 119)
-		{										//	1 : (420, 172)
-			config["Points"]["1"] = locate;		//	2 : (421, 311)
-		}										//	3 : (186, 314)
-		if (countL == 2)
-		{
-			config["Points"]["2"] = locate;
-		}
-		if (countL == 3)
-		{
-			config["Points"]["3"] = locate;
-			fout << config << "\n";
-		}
-		putText(srcImage, locate, Point(x, y), FONT_HERSHEY_PLAIN, 3.0, CV_RGB(0, 0, 255));//显示坐标
-		circle(srcImage, Point(x, y), 8, CV_RGB(0, 0, 255));//划圆
+		//putText(srcImage, locate, Point(x, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0, 0, 255));//显示坐标
+		circle(srcImage, Point(x, y), 3, CV_RGB(0, 0, 255));//划圆
 		imshow(OriginalWindowName, srcImage);
 		countL++;
 	}
@@ -620,18 +599,26 @@ void on_mouse(int event, int x, int y, int flags, void* ustc)
 		pWnd->GetClientRect(&rect);
 		resize(srcImage, srcImage, Size(rect.Width(), rect.Height()));
 		imshow(OriginalWindowName, srcImage);
-		fout.close();				//关闭后再打开是为了清空前一次透视变换得到的矩阵，保证在yaml文件
-		fout.open(str);				//中只保存最新选中的透视变换中的源点
+		fs_write.release(); //关闭后再打开是为了清空前一次透视变换得到的矩阵，保证在yaml文件
+		fs_write.open(str,1,"UTF-8"); //中只保存最新选中的透视变换中的源点		
 	}
 }
 
 //图像锐化
-void CImageProcessDlg::OnBnClickedButtonimagesharpen()
-{
-	// TODO: 在此添加控件通知处理程序代码
-	ImageSharpen ImageSharpenDlg;
-	ImageSharpenDlg.DoModal();
-}
+//void CImageProcessDlg::OnBnClickedButtonimagesharpen()
+//{
+//	// TODO: 在此添加控件通知处理程序代码
+//	ImageSharpen ImageSharpenDlg;
+//	ImageSharpenDlg.DoModal();
+//}
+
+//边缘检测
+//void CImageProcessDlg::OnBnClickedButtonedgedetect()
+//{
+//	// TODO: 在此添加控件通知处理程序代码
+//	EdgeDetect EdgeDetectDlg;
+//	EdgeDetectDlg.DoModal();
+//}
 
 //鼠标滑轮缩放图像
 BOOL CImageProcessDlg::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
@@ -746,7 +733,6 @@ void onMouse(int event, int x, int y, int flags, void* ustc)
 	imshow(OriginalWindowName, dstImage);
 	}
 }
-
 
 
 /*

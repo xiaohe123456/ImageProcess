@@ -56,4 +56,9 @@ public:
 	CComboBox SegLineGray1;
 	// 分段线性变换分段值2
 	CComboBox SegLineGray2;
+	afx_msg void OnBnClickedButtonintroduceline();
+	afx_msg void OnBnClickedButtonintroducegamma();
+	afx_msg void OnBnClickedButtonintroduceahe();
+	afx_msg void OnBnClickedButtonintroduceequhist();
+	afx_msg void OnBnClickedButtonintroducelog();
 };

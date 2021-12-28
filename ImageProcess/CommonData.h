@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "yaml-cpp/yaml.h"
-#include "resource.h"
+
 
 extern Mat srcImage;					//原图像
 extern Mat middleImage1;				//中间结果1
@@ -16,10 +16,10 @@ extern string MiddleWindowName2 ;		//显示中间结果窗口2
 extern vector<Mat> resultMidWindow1;	//保存中间窗口1的结果图像
 extern vector<Mat> resultMidWindow2;	//保存中间窗口2的结果图像
 
-extern string pathName;		//读取图像的路径及文件名
-extern CString str;			//yaml文件名
+extern string pathName;			//读取图像的路径及文件名
 
-extern CFile file;			//保存yaml文件定义的文件参数  当前未使用
+extern FileStorage fs_write;	//定义yaml文件存储类
+extern char* str;				//yaml文件名
 
 extern int flagFilter;			//图像滤波标志位
 extern int flagEnhance;			//图像增强标志位
@@ -27,9 +27,6 @@ extern int flagGeoTransform;	//图像几何变换标志位
 extern int flagMouse;			//鼠标缩放事件标志，避免鼠标移动时图像显示出错
 extern int middleWindow1;		//统计中间窗口1显示结果的次数
 extern int middleWindow2;		//统计中间窗口2显示结果的次数
-
-extern YAML::Node config;		//yaml文件中的结点，保存透视变换时的四个源点坐标
-extern ofstream fout;			//将图像处理步骤保存到yaml文件定义的文件流
 
 extern Point2f srcPoints[4];		//原图中的四点,一个包含三维点（x，y）的数组
 extern Point2f dstPoints[4];		//变换中的目标点 

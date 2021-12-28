@@ -1,4 +1,4 @@
-﻿
+﻿#include"ImageSharpen.h"
 // ImageProcessDlg.h: 头文件
 //
 
@@ -34,11 +34,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	CString  mPath; //图像路径
-	CString mPath1, mPath2;
+	CString  mPath;				//图像路径
+	CString mPath1, mPath2;		//上一张下一张切换时用到		
 	
 	double Zoom = 1;		//图像缩放基准
-	double Radio = 0.1;	//图像缩放比例
+	double Radio = 0.1;		//图像缩放比例
 	
 	std::vector<CString> mFileList;						//文件名列表
 	int numImageNow;									//当前图像序号
@@ -59,10 +59,10 @@ public:
 	// 二值化中的大阈值
 	CSliderCtrl MaxThreshold;
 	
-	afx_msg void OnBnClickedButtonedgedetect();
+	//afx_msg void OnBnClickedButtonedgedetect();
 	afx_msg void OnBnClickedButtonpreprocess1();
 	afx_msg void OnBnClickedButtonpreprocess2();
-	afx_msg void OnBnClickedButtonimagesharpen();
+	//afx_msg void OnBnClickedButtonimagesharpen();
 	afx_msg void OnBnClickedButtonnextimage();
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 

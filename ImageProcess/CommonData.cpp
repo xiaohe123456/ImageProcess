@@ -16,8 +16,10 @@ string OriginalWindowName = "ImageShowOriginal";  //显示原图像窗口
 string MiddleWindowName1 = "ImageShowMiddle1";    //显示中间结果窗口1
 string MiddleWindowName2 = "ImageShowMiddle2";    //显示中间结果窗口2
 
-string pathName;							//读取图像时的图像路径及图像文件名
-CString str = _T("../yamlTest12.yaml");		//const cahr* 转CString  yaml文件名
+string pathName;								//读取图像时的图像路径及图像文件名
+
+char* str = "../operation.yaml";				//yaml文件名
+FileStorage fs_write(str,FileStorage::WRITE);
 
 int flagFilter = 0;
 int flagEnhance = 0;
@@ -25,10 +27,6 @@ int flagGeoTransform = 0;
 int flagMouse = 0;
 int middleWindow1 = 0;
 int middleWindow2 = 0;
-
-ofstream fout(str);									//方式2：创建并打开的yaml文件
-string yamlName(CW2A(str.GetString()));
-YAML::Node config = YAML::LoadFile(yamlName);		//加载yaml文件  获取yaml文件结点
 
 int countL = 0;			//透视变换时统计点的数目  鼠标左键
 int countR = 0;			//仿射变换时统计点的数目  鼠标右键

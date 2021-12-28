@@ -30,7 +30,6 @@
 #define IDC_LogEnhance                  1029
 #define IDC_SegLineEnhance              1030
 #define IDC_CLAHEEnhance                1031
-#define IDC_STATICLogC                  1032
 #define IDC_BUTTONLogEnhance            1034
 #define IDC_STATISegLineK1              1035
 #define IDC_STATISegLineK2              1036
@@ -44,7 +43,7 @@
 #define IDC_BUTTONCRATE                 1052
 #define IDC_BUTTONCLAHE                 1052
 #define IDC_BUTTONBoxFilter             1053
-#define IDC_BUTTONEdgeDetect            1053
+//#define IDC_BUTTONEdgeDetect            1053
 #define IDC_BUTTONMeanFilter            1054
 #define IDC_STATICCanny                 1054
 #define IDC_BUTTONMedianFilter          1055
@@ -98,13 +97,11 @@
 #define IDC_BUTTONBinary                1088
 #define IDC_COMBOB                      1088
 #define IDC_EDITBinaryMin               1089
-#define IDC_COMBOCofficient             1089
 #define IDC_EDITBinaryMax               1090
 #define IDC_COMBOIndex                  1090
 #define IDC_STATICBinary                1091
 #define IDC_COMBOContrastThresh         1091
 #define IDC_STATICBinaryMin             1092
-#define IDC_COMBOLogC                   1092
 #define IDC_STATICBinaryMax             1093
 #define IDC_COMBOSegLineK1              1093
 #define IDC_STATICBoxKernel             1094
@@ -123,7 +120,7 @@
 #define IDC_COMBOSegLineGray2           1098
 #define IDC_BUTTONImageAffine           1098
 #define IDC_STATICMedianKernel          1099
-#define IDC_BUTTONImageSharpen          1099
+//#define IDC_BUTTONImageSharpen          1099
 #define IDC_STATICGaussianFilter        1100
 #define IDC_STATICSobel                 1100
 #define IDC_STATICGaussianKernel        1101
@@ -162,9 +159,20 @@
 #define IDC_STATICScaleAngle            1118
 #define IDC_BUTTONRevoke                1118
 #define IDC_STATICSimScale              1119
-#define IDC_BUTTON                      1119
 #define IDC_BUTTONIntroduceBox          1119
 #define IDC_ImagePerspective            1120
+#define IDC_BUTTONIntroduceBlur         1120
+#define IDC_BUTTONIntroduceMedian       1121
+#define IDC_BUTTONIntroduceGaussian     1122
+#define IDC_BUTTONIntroduceBilateral    1123
+#define IDC_BUTTONIntroduceLine         1124
+#define IDC_BUTTONIntroduceGamma        1125
+#define IDC_STATICIndex                 1126
+#define IDC_BUTTONIntroduceAHE          1127
+#define IDC_BUTTONIntroduceEqu          1128
+#define IDC_BUTTONIntroduceEquhist      1128
+#define IDC_BUTTON1                     1130
+#define IDC_BUTTONIntroduceLog          1130
 #define IDC_BUTTONLineEnhance2          32813
 #define IDC_BUTTONGammaEnhance          32813
 
@@ -174,7 +182,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        148
 #define _APS_NEXT_COMMAND_VALUE         32814
-#define _APS_NEXT_CONTROL_VALUE         1120
+#define _APS_NEXT_CONTROL_VALUE         1131
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

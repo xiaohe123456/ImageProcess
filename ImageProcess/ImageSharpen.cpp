@@ -107,12 +107,10 @@ void ImageSharpen::OnBnClickedButtonsobel()
 		if (direction == 0)
 		{
 			Sobel(middleImage1, middleImage1, CV_16S, 1, 0, ksize, scale, delta);	//X方向
-			fout << "Sobel(srcImage, middleImage1, CV_16S, 1, 0, " << ksize << ", " << scale << ", "<< delta << ");\n";
-		}	
+		}
 		else
 		{
 			Sobel(middleImage1, middleImage1, CV_16S, 0, 1, ksize, scale, delta);	//Y方向
-			fout << "Sobel(srcImage, middleImage1, CV_16S, 0, 1, " << ksize << ", " << scale << ", " << delta << ");\n";
 		}
 		convertScaleAbs(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
@@ -131,12 +129,10 @@ void ImageSharpen::OnBnClickedButtonsobel()
 		if (direction == 0)
 		{
 			Sobel(middleImage2, middleImage1, CV_16S, 1, 0, ksize, scale, delta);
-			fout << "Sobel(middleImage2, middleImage1, CV_16S, 1, 0, " << ksize << ", " << scale << ", " << delta << ");\n";
 		}
 		else
 		{
 			Sobel(middleImage2, middleImage1, CV_16S, 1, 0, ksize, scale, delta);
-			fout << "Sobel(middleImage2, middleImage1, CV_16S, 1, 0, " << ksize << ", " << scale << ", " << delta << ");\n";
 		}
 		convertScaleAbs(middleImage1, middleImage1);
 		imshow(MiddleWindowName1, middleImage1);
@@ -155,18 +151,22 @@ void ImageSharpen::OnBnClickedButtonsobel()
 		if (direction == 0)
 		{
 			Sobel(middleImage1, middleImage2, CV_16S, 1, 0, ksize, scale, delta);
-			fout << "Sobel(middleImage1, middleImage2, CV_16S, 1, 0, " << ksize << ", " << scale << ", " << delta << ");\n";
 		}
 		else
 		{
 			Sobel(middleImage1, middleImage2, CV_16S, 1, 0, ksize, scale, delta);
-			fout << "Sobel(middleImage1, middleImage2, CV_16S, 1, 0, " << ksize << ", " << scale << ", " << delta << ");\n";
 		}
 		convertScaleAbs(middleImage2, middleImage2);
 		imshow(MiddleWindowName2, middleImage2);
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "Sobel" << "effect" << "image edge detection";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "direction" << direction << "kSize" << ksize << "scale" << scale << "delta" << delta;
+	fs_write << "}";
 }
 
 //拉普拉斯算子锐化图像
@@ -229,4 +229,10 @@ void ImageSharpen::OnBnClickedButtonlaplacian()
 		resultMidWindow2.push_back(middleImage2);
 		middleWindow2++;
 	}
+	fs_write << "Operation" << "{";
+	fs_write << "function" << "Laplacian" << "effect" << "image edge detection";
+	fs_write << "}";
+	fs_write << "Param" << "{";
+	fs_write << "kSize" << ksize;
+	fs_write << "}";
 }
