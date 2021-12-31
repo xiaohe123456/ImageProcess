@@ -136,7 +136,7 @@ BOOL CImageProcessDlg::OnInitDialog()
 	//嵌套OpenCV窗口显示图像  原图像
 	CRect rect;
 	GetDlgItem(IDC_ShowOriImg)->GetWindowRect(rect);
-	namedWindow(OriginalWindowName, CV_WINDOW_AUTOSIZE);   //创建OpenCV窗口 可以改变大小 图像适应picture control大小
+	namedWindow(OriginalWindowName, CV_WINDOW_KEEPRATIO);   //创建OpenCV窗口 可以改变大小 图像适应picture control大小
 	resizeWindow(OriginalWindowName, rect.Width(), rect.Height());
 	setMouseCallback(OriginalWindowName, on_mouse, 0);   //鼠标回调函数  获取透视变换中四个点的坐标
 	//setMouseCallback(OriginalWindowName, onMouse, 0);   //鼠标回调函数 实现鼠标拖动图像移动
@@ -328,18 +328,20 @@ void CImageProcessDlg::OnBnClickedButtonnextimage()
 void CImageProcessDlg::OnBnClickedButtonsaveimage()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	CFileDialog dlg(false, _T("*.jpeg"), NULL, OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-		_T("image files (*.bmp ;*.jpeg)|*.bmp; *.jpeg |ALL Files (*.*) |*.*||"), NULL);
+	CFileDialog dlg(TRUE, _T("*.jpg"), NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+		_T("image files (*.png; *.bmp; *.jpg) |*.png;*.bmp;*.jpg|All Files (*.*)|*.*||"), NULL);
 	//打开文件对话框的标题名
 	dlg.m_ofn.lpstrTitle = _T("保存图像 ");
 	if (dlg.DoModal() != IDOK)
 		return;
 	CString  mPath1 = dlg.GetPathName();
 	string mPath(CW2A(mPath1.GetString()));
-	if (middleImage2.rows == 0)
+	if (middleWindow2 == 0 && middleWindow1 == 0)
 		imwrite(mPath, middleImage1);
-	else if (middleImage1.rows == 0)
+	else if (middleWindow2 >= middleWindow1)
 		imwrite(mPath, middleImage2);
+	else if (middleWindow1 > middleWindow2)
+		imwrite(mPath, middleImage1);
 	else
 		MessageBox(_T("error"));
 	fs_write.release();
@@ -551,7 +553,7 @@ void on_mouse(int event, int x, int y, int flags, void* ustc)
 	{
 		img1 = srcImage.clone();
 		sprintf_s(locate, "(%d,%d)", x, y);
-		putText(img1, locate, Point(x, y), FONT_HERSHEY_PLAIN, 3.0, CV_RGB(0, 0, 255));
+		putText(img1, locate, Point(x, y), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0, 0, 255));
 		if (flagMouse == 1)			//表示执行过鼠标缩放事件  显示缩放后的结果
 		{
 			imshow(OriginalWindowName, dstImage);

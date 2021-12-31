@@ -141,6 +141,9 @@ void ImageGeoTransform::OnBnClickedButtonimagemove()
 	Move.convertTo(Move, CV_32F);  //平移矩阵格式转换  方便只将变换矩阵保存到yaml文件
 	float out[3][3];
 	fs_write << "Param" << "{";
+	fs_write << "image size" << "{";
+	fs_write << "rows" << srcImage.rows;
+	fs_write << "cols" << srcImage.cols << "}";
 	fs_write << "move x" << dMoveX;
 	fs_write << "move y" << dMoveY;
 	fs_write << "Matrix" << "[:";			//平移矩阵
@@ -223,6 +226,9 @@ void ImageGeoTransform::OnBnClickedButtonimagerotate()
 	Rotate.convertTo(Rotate, CV_32F);  //旋转矩阵格式转换  方便只将变换矩阵保存到yaml文件
 	float out[3][3];
 	fs_write << "Param" << "{";
+	fs_write << "image size" << "{";
+	fs_write << "rows" << srcImage.rows;
+	fs_write << "cols" << srcImage.cols << "}";
 	fs_write << "angle" << dAngle;
 	fs_write << "Matrix" << "[:";			//旋转变换矩阵
 	for (int i = 0; i < Rotate.rows; i++)
@@ -419,17 +425,22 @@ void ImageGeoTransform::OnBnClickedButtonimageperpective()
 		MessageBox(_T("加载图片失败"));
 		return;
 	}
-	if(srcPoints[0] == Point2f(0, 0))
+
+	//srcPoints[0] = Point2f(63, 252);
+	//srcPoints[1] = Point2f(344, 167);
+	//srcPoints[2] = Point2f(354, 310);
+	//srcPoints[3] = Point2f(110, 431);
+	if (srcPoints[0] == Point2f(0, 0))
 	{
 		MessageBox(_T("请用鼠标左键标记透视变换的源点"));
 		return;
 	}
-
 	//透视变换目标点坐标
 	dstPoints[0] = Point2f(0, 0);
 	dstPoints[1] = Point2f(srcImage.cols, 0);
 	dstPoints[2] = Point2f(srcImage.cols, srcImage.rows);
 	dstPoints[3] = Point2f(0, srcImage.rows);
+	
 	Mat Perspective = getPerspectiveTransform(srcPoints, dstPoints);//由四个点对计算透视变换矩阵  
 	if (middleWindow1 == 0 && middleWindow2 == 0)
 	{
@@ -459,6 +470,9 @@ void ImageGeoTransform::OnBnClickedButtonimageperpective()
 	Perspective.convertTo(Perspective, CV_32F);  //透视变换矩阵格式转换  方便只将变换矩阵保存到yaml文件
 	float out[3][3];
 	fs_write << "Param" << "{";
+	fs_write << "image size" << "{";
+	fs_write << "rows" << srcImage.rows;
+	fs_write << "cols" << srcImage.cols << "}";
 	fs_write << "Points" << "[";				//透视变换的源点
 	for (int i = 0; i < countL; i++)
 	{
@@ -478,6 +492,7 @@ void ImageGeoTransform::OnBnClickedButtonimageperpective()
 	fs_write << "Size" << "{";				//透视变换矩阵大小
 	fs_write << "rows" << Perspective.rows << "cols" << Perspective.cols << "}";
 	fs_write  << "}";
+	//fs_write << "param" << Perspective;
 }
 
 //仿射变换
@@ -523,6 +538,9 @@ void ImageGeoTransform::OnBnClickedButtonimageaffine()
 	Affine.convertTo(Affine, CV_32F);  //仿射变换矩阵格式转换  方便只将变换矩阵保存到yaml文件
 	float out[3][3];
 	fs_write << "Param" << "{";
+	fs_write << "image size" << "{";
+	fs_write << "rows" << srcImage.rows;
+	fs_write << "cols" << srcImage.cols << "}";
 	fs_write << "Points" << "[";				//仿射变换的源点
 	for (int i = 0; i < countR; i++)
 	{
