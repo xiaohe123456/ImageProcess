@@ -328,13 +328,13 @@ void CImageProcessDlg::OnBnClickedButtonnextimage()
 void CImageProcessDlg::OnBnClickedButtonsaveimage()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	CFileDialog dlg(TRUE, _T("*.jpg"), NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+	CFileDialog dlg(FALSE, _T("*.jpg"), NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
 		_T("image files (*.png; *.bmp; *.jpg) |*.png;*.bmp;*.jpg|All Files (*.*)|*.*||"), NULL);
 	//打开文件对话框的标题名
 	dlg.m_ofn.lpstrTitle = _T("保存图像 ");
 	if (dlg.DoModal() != IDOK)
 		return;
-	CString  mPath1 = dlg.GetPathName();
+	mPath1 = dlg.GetPathName();
 	string mPath(CW2A(mPath1.GetString()));
 	if (middleWindow2 == 0 && middleWindow1 == 0)
 		imwrite(mPath, middleImage1);
